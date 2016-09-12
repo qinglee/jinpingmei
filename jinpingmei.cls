@@ -71,6 +71,7 @@
 \setCJKsansfont [ BoldFont = DFPNHeiXBold-B5 ]  { DFPHeiMedium-B5 }
 \setCJKmonofont [ BoldFont = DFPFangSongW6-B5 ] { DFPFangSongW4-B5 }
 \setCJKmainfont [ Ext , ItalicFont = FZKaiT-Extended(SIP) ] { PMingLiU-ExtB }
+\setCJKmonofont [ Ext ] { ZHZKFangSong-ExtB }
 \group_begin:
   \tl_clear:N \l_tmpa_tl
   \int_step_inline:nnnn { 1 } { 1 } { 9 }
@@ -161,19 +162,19 @@
       { \raggedright }
       { \raggedleft }
   }
-\cs_new_eq:NN \jinpingmei@saved@contentsline \contentsline
+\cs_new_eq:NN \@@_saved_contentsline:nnnn \contentsline
 \RenewDocumentCommand \contentsline { m }
   {
-    \cs_if_exist_use:cF { toc@label@#1 }
-      { \jinpingmei@saved@contentsline {#1} }
+    \cs_if_exist_use:cF { @@_toc_#1:nnn }
+      { \@@_saved_contentsline:nnnn {#1} }
   }
-\cs_new_protected:Npn \toc@label@chapter
+\cs_new_protected_nopar:Npn \@@_toc_chapter:nnn
   {
     \int_compare:nNnTF { \value { tocdepth } } > \c_minus_one
-      { \@@_toc_chapter:nnn }
+      { \@@_toc_chapter_aux:nnn }
       { \use_none:nnn }
   }
-\cs_new_protected:Npn \@@_toc_chapter:nnn #1
+\cs_new_protected:Npn \@@_toc_chapter_aux:nnn #1
   { \@@_toc_chapter_aux:w #1 \q_stop }
 \cs_new_protected:Npn \@@_toc_chapter_aux:w \numberline #1 #2 ^^^^3000 #3 \q_stop
   { \@@_toc_chapter:nnnnn {#1} {#2} {#3} }
@@ -229,15 +230,11 @@
   { \etex_marks:D \g_@@_toc_label_mark {#1} }
 \RenewDocumentCommand \tableofcontents { }
   {
+    \clearpage
     \group_begin:
-      \ctexset
-        {
-          chapter/aftertitle+ = {
-            \chaptermark { \contentsname }
-            \bookmark [ level = chapter , dest = \@currentHref ] { \contentsname }
-          }
-        }
-      \chapter * { \contentsname }
+      \cs_set_eq:NN \addtocontents \use_none:nn
+      \@mainmatterfalse
+      \chapter { \contentsname }
       \AtBeginShipout { \@@_set_toc_label_width: }
       \@starttoc { toc }
       \AtBeginShipoutNext { \tl_gclear:N \@@_set_toc_label_width: }
